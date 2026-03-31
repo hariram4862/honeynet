@@ -11,3 +11,7 @@ Thumbs.db
 
 # Editor
 .vscode/
+terraform/*.tfvars
+terraform/*.auto.tfvars
+!terraform/*.example
+terraform/modules/telemetry/lambda_enrichment.zip

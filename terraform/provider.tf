@@ -1,4 +1,8 @@
 provider "aws" {
+  region = var.telemetry_region
+}
+
+provider "aws" {
   alias  = "us"
   region = "us-east-1"
 }

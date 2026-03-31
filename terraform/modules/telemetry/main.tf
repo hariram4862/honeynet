@@ -13,7 +13,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.0"
     }
   }
 }
@@ -23,7 +23,7 @@ terraform {
 # -----------------------------------------------------------------------------
 
 resource "aws_s3_bucket" "log_sink" {
-  bucket        = "${var.name_prefix}-threat-log-sink"
+  bucket        = "${var.name_prefix}-threat-log-sink-1"
   force_destroy = false
 
   tags = {
@@ -81,7 +81,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "log_sink" {
 
 # S3 bucket for enriched logs output
 resource "aws_s3_bucket" "enriched_logs" {
-  bucket        = "${var.name_prefix}-enriched-threat-logs"
+  bucket        = "${var.name_prefix}-enriched-threat-logs-1"
   force_destroy = false
 
   tags = {
@@ -111,7 +111,7 @@ resource "aws_s3_bucket_public_access_block" "enriched_logs" {
 
 # Athena query results bucket
 resource "aws_s3_bucket" "athena_results" {
-  bucket        = "${var.name_prefix}-athena-query-results"
+  bucket        = "${var.name_prefix}-athena-query-results-1"
   force_destroy = true
 
   tags = {
@@ -134,7 +134,7 @@ resource "aws_s3_bucket_public_access_block" "athena_results" {
 # -----------------------------------------------------------------------------
 
 resource "aws_secretsmanager_secret" "abuseipdb_key" {
-  name                    = "${var.name_prefix}/abuseipdb-api-key"
+  name                    = "${var.name_prefix}/abuseipdb-api-key-2"
   description             = "AbuseIPDB API key for threat intelligence enrichment"
   recovery_window_in_days = 7
 
@@ -236,9 +236,9 @@ resource "aws_lambda_function" "enrichment" {
 
   environment {
     variables = {
-      ENRICHED_BUCKET   = aws_s3_bucket.enriched_logs.bucket
-      SECRET_NAME       = aws_secretsmanager_secret.abuseipdb_key.name
-      AWS_REGION_NAME   = var.aws_region
+      ENRICHED_BUCKET = aws_s3_bucket.enriched_logs.bucket
+      SECRET_NAME     = aws_secretsmanager_secret.abuseipdb_key.name
+      AWS_REGION_NAME = var.aws_region
     }
   }
 
@@ -264,7 +264,7 @@ resource "aws_s3_bucket_notification" "log_trigger" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.enrichment.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_suffix       = ".json"
+    filter_prefix       = "raw/"
   }
 
   depends_on = [aws_lambda_permission.allow_s3]
@@ -299,8 +299,8 @@ resource "aws_iam_role_policy_attachment" "glue_service" {
 
 data "aws_iam_policy_document" "glue_s3_access" {
   statement {
-    effect    = "Allow"
-    actions   = ["s3:GetObject", "s3:ListBucket"]
+    effect  = "Allow"
+    actions = ["s3:GetObject", "s3:ListBucket"]
     resources = [
       aws_s3_bucket.enriched_logs.arn,
       "${aws_s3_bucket.enriched_logs.arn}/*"

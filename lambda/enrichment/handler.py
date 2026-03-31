@@ -15,6 +15,7 @@ A busy honeypot gets 5,000+ attempts/day — caching is non-negotiable.
 
 import json
 import os
+import gzip
 import urllib.request
 import urllib.error
 import boto3
@@ -174,7 +175,15 @@ def lambda_handler(event, context):
 
         try:
             obj = s3.get_object(Bucket=source_bucket, Key=source_key)
-            raw_content = obj["Body"].read().decode("utf-8")
+            raw_bytes = obj["Body"].read()
+            content_encoding = obj.get("ContentEncoding", "")
+
+            # Fluent Bit can gzip-compress S3 objects before upload.
+            # Detect both explicit content-encoding and gzip magic bytes.
+            if content_encoding == "gzip" or raw_bytes[:2] == b"\x1f\x8b":
+                raw_content = gzip.decompress(raw_bytes).decode("utf-8")
+            else:
+                raw_content = raw_bytes.decode("utf-8")
         except Exception as e:
             logger.error(f"Failed to read s3://{source_bucket}/{source_key}: {e}")
             errors += 1

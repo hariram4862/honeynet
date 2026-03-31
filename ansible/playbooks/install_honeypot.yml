@@ -51,11 +51,13 @@
         group: ubuntu
         recurse: yes
 
-    - name: Copy Cowrie config
-      copy:
-        src: "{{ cowrie_dir }}/etc/cowrie.cfg.dist"
+    - name: Deploy Cowrie config
+      template:
+        src: ../templates/cowrie.cfg.j2
         dest: "{{ cowrie_dir }}/etc/cowrie.cfg"
-        remote_src: yes
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
 
     - name: Install Twisted
       command: "{{ cowrie_dir }}/cowrie-env/bin/pip install twisted"

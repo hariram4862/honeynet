@@ -31,9 +31,9 @@ output "glue_database" {
 output "example_athena_queries" {
   description = "Example SQL queries to run in Athena."
   value = {
-    top_attacking_ips    = "SELECT src_ip, COUNT(*) as attempts FROM ${aws_glue_catalog_database.honeynet.name}.enriched ORDER BY attempts DESC LIMIT 20;"
-    high_abuse_scores    = "SELECT src_ip, abuse_score, country_code FROM ${aws_glue_catalog_database.honeynet.name}.enriched WHERE abuse_score > 80 ORDER BY abuse_score DESC;"
-    attacks_by_country   = "SELECT country_code, COUNT(*) as attacks FROM ${aws_glue_catalog_database.honeynet.name}.enriched GROUP BY country_code ORDER BY attacks DESC;"
-    credential_attempts  = "SELECT username, password, COUNT(*) as tries FROM ${aws_glue_catalog_database.honeynet.name}.enriched WHERE eventid='cowrie.login.failed' GROUP BY username, password ORDER BY tries DESC LIMIT 20;"
+    top_attacking_ips   = "SELECT src_ip, COUNT(*) as attempts FROM ${aws_glue_catalog_database.honeynet.name}.enriched ORDER BY attempts DESC LIMIT 20;"
+    high_abuse_scores   = "SELECT src_ip, abuse_score, country_code FROM ${aws_glue_catalog_database.honeynet.name}.enriched WHERE abuse_score > 80 ORDER BY abuse_score DESC;"
+    attacks_by_country  = "SELECT country_code, COUNT(*) as attacks FROM ${aws_glue_catalog_database.honeynet.name}.enriched GROUP BY country_code ORDER BY attacks DESC;"
+    credential_attempts = "SELECT username, password, COUNT(*) as tries FROM ${aws_glue_catalog_database.honeynet.name}.enriched WHERE eventid='cowrie.login.failed' GROUP BY username, password ORDER BY tries DESC LIMIT 20;"
   }
 }
